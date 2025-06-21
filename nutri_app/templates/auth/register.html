@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up | The Nutri Cat{% endblock %}
+
+{% block section %}
+<section class="register d-flex justify-content-center align-items-center">
+    <div id="container" class="position-absolute w-100 h-100 top-0 start-0 overflow-hidden"></div>
+    <div class="container-fluid">
+        <div class="row justify-content-center align-items-center">
+            <div
+                class="col-12 col-xs-10 col-s-9 col-sm-7 col-m-6 col-md-5 col-lg-4 register-form d-flex justify-content-center align-items-center auth-form">
+                <form id="registration-form" action="{{ url_for('auth.register') }}" method="post" autocomplete="off">
+                    <h2 class="position-relative text-white text-center fs-3 fw-semibold my-5">Sign Up</h2>
+                    <div class="input-group">
+                        <input type="email" class="input required-field" name="email" id="email" data-field="email"
+                            placeholder="" autofocus required>
+                        <label for="email" class="label">Email</label>
+                        <div class="feedback pt-2" aria-live="polite"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" class="input required-field" name="password" id="password"
+                            data-field="password" placeholder="" required>
+                        <span class="toggleBtn hidden"></span>
+                        <label for="password" class="label">Password</label>
+                        <div class="feedback pt-2" aria-live="polite"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" class="input required-field" name="confirmation" id="confirmation"
+                            data-field="confirm_password" placeholder="" required>
+                        <span class="toggleBtn hidden"></span>
+                        <label for="confirmation" class="label">Confirm Password</label>
+                        <div class="feedback pt-2" aria-live="polite"></div>
+                    </div>
+                    <div class="check">
+                        <label class="d-flex position-relative text-white align-items-center ps-3">
+                            <input type="checkbox" name="terms" id="terms" class="text-white required-field"
+                                data-field="terms" value="accepted" required>
+                            <span>I agree with <a href="#">the terms and conditions</a></span>
+                            <div class="feedback pt-2 d-block" aria-live="polite"></div>
+                        </label>
+                    </div>
+                    <!-- reCAPTCHA widget -->
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                    </div>
+                    <button id="submit-registration-form" class="btn w-100 text-uppercase shining-btn mt-3"
+                        type="submit">Submit</button>
+                    <div class="signin">
+                        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+<script src="{{ url_for('static', filename='js/formHandlers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,4 @@
+nutrivenv/
+__pycache__/
+logs/
+.env
