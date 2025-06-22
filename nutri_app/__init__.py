@@ -10,6 +10,7 @@ from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 from werkzeug.exceptions import HTTPException
 
 # Load environment variables from .env file
@@ -18,6 +19,7 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
+login_manager = LoginManager()
 
 def configure_logging(app):
     """
@@ -67,11 +69,12 @@ def register_blueprints(app):
     from nutri_app.auth import bp as auth_bp
     from nutri_app.recipes import bp as recipes_bp
     from nutri_app.menus import bp as menus_bp
+    from nutri_app.account import bp as profile_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(recipes_bp)
     app.register_blueprint(menus_bp)
-
+    app.register_blueprint(profile_bp)
 
 def create_app():
     """
@@ -89,6 +92,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+    login_manager.init_app(app)
     configure_logging(app)
     register_blueprints(app)
     

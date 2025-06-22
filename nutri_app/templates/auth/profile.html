@@ -67,30 +67,35 @@
 <div class="modal fade" id="changeUsernameModal" tabindex="-1" aria-labelledby="changeUsernameModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form method="POST" action="{{ url_for('auth.change_username') }}">
+    <form method="POST" action="{{ url_for('account.change_username') }}">
       <div class="modal-content rounded-4">
         <div class="modal-header border-0">
           <div class="modal-header border-0 d-flex justify-content-between">
             <h5 class="modal-title fw-bold me-5" id="changeUsernameModalLabel">Change Username</h5>
-            <button type="button" class="btn-close bg-success text-white" data-bs-dismiss="modal" aria-label="Close"><i
-                class="bi bi-x"></i></button>
+            <button type="button" class="btn-close bg-success text-white" data-bs-dismiss="modal" aria-label="Close">
+              <i class="bi bi-x"></i></button>
           </div>
         </div>
         <div class="modal-body m-3">
           <div class="mb-3">
-            <label for="newUsername" class="form-label">New Username</label>
-            <input type="text" class="form-control" id="newUsername" name="new_username" required minlength="3"
-              maxlength="20" pattern="^[a-zA-Z0-9_]+$"
-              title="Username can only contain letters, numbers, and underscores.">
+            {{ change_username_form.hidden_tag() }}
+            {{ change_username_form.new_username.label(class="form-label") }}
+            {{ change_username_form.new_username(id="newUsername", class="form-control", minlength="3", maxlength="30", pattern="^[a-zA-Z0-9_]+$", required=True, title="Username can only contain letters, numbers, and underscores.") }}
+            {% if change_username_form.new_username.errors %}
+              {% for error in change_username_form.new_username.errors %}
+                <div class="form-text text-danger">{{ error }}</div>
+              {% endfor %}
+            {% else %}
+              <div class="form-text">Pick a unique username that contains only letters, numbers, and underscores. At least 3 characters long.</div>
+            {% endif %}
+            
           </div>
         </div>
         <div class="modal-footer border-0 justify-content-center">
           <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">
             Cancel
           </button>
-          <button type="submit" class="btn btn-success rounded-3 px-4">
-            Save
-          </button>
+          {{ change_username_form.submit(class="btn btn-success rounded-3 px-4") }}
         </div>
       </div>
     </form>
@@ -100,7 +105,7 @@
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form method="POST" action="{{ url_for('auth.change_password') }}" id="changePasswordForm">
+    <form method="POST" action="{{ url_for('account.change_password') }}" id="changePasswordForm">
       <div class="modal-content rounded-4">
         <div class="modal-header border-0">
           <div class="modal-header border-0 d-flex justify-content-between">
@@ -111,27 +116,24 @@
         </div>
         <div class="modal-body m-5">
           <div class="mb-3">
-            <label for="currentPassword" class="form-label">Current Password</label>
-            <input type="password" class="form-control required-field" id="currentPassword" name="current_password"
-              required>
+            {{ change_password_form.hidden_tag() }}
+            {{ change_password_form.current_password.label(class="form-label") }}
+            {{ change_password_form.current_password(id="currentPassword", class="form-control required-field", required=True )}}
           </div>
           <div class="input-group d-flex flex-column justify-content-start">
-            <label for="password" class="form-label label text-secondary">New Password</label>
-            <input type="password" class="input required-field form-control w-100" name="new_password" id="password"
-              data-field="password" placeholder="" required>
+            {{ change_password_form.new_password.label(class="form-label label text-secondary") }}
+            {{ change_password_form.new_password(id="password", class="input required-field form-control w-100", placeholder="", required=True, **{'data-field': 'password'}) }}
             <div class="feedback pt-2" aria-live="polite"></div>
           </div>
           <div class="input-group d-flex flex-column justify-content-start">
-            <label for="confirmation" class="form-label label text-secondary">Confirm New Password</label>
-            <input type="password" class="input required-field form-control w-100" name="confirmation" id="confirmation"
-              data-field="confirm_password" placeholder="" required>
+            {{ change_password_form.confirmation.label(class="form-label label text-secondary") }}
+            {{ change_password_form.confirmation(class="input required-field form-control w-100", placeholder="", required=True, **{'data-field': 'confirm_password'}) }}
             <div class="feedback pt-2" aria-live="polite"></div>
           </div>
         </div>
         <div class="modal-footer border-0 justify-content-center">
           <button type="button" class="btn btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success rounded-3 px-4 shining-btn"
-            id="submit-change-password-form">Update</button>
+          {{ change_password_form.submit(id="submit-change-password-form", class="btn btn-success rounded-3 px-4 shining-btn") }}
         </div>
       </div>
     </form>

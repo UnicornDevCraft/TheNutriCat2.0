@@ -10,43 +10,38 @@
             <div
                 class="col-12 col-xs-10 col-s-9 col-sm-7 col-m-6 col-md-5 col-lg-4 register-form d-flex justify-content-center align-items-center auth-form">
                 <form id="registration-form" action="{{ url_for('auth.register') }}" method="post" autocomplete="off">
+                    {{ form.hidden_tag() }}
                     <h2 class="position-relative text-white text-center fs-3 fw-semibold my-5">Sign Up</h2>
                     <div class="input-group">
-                        <input type="email" class="input required-field" name="email" id="email" data-field="email"
-                            placeholder="" autofocus required>
-                        <label for="email" class="label">Email</label>
+                        {{ form.email(class="input required-field", placeholder="", autofocus=True, required=True, **{'data-field': 'email'}) }}
+                        {{ form.email.label(class="label") }}
                         <div class="feedback pt-2" aria-live="polite"></div>
                     </div>
                     <div class="input-group">
-                        <input type="password" class="input required-field" name="password" id="password"
-                            data-field="password" placeholder="" required>
+                        {{ form.password(class="input required-field", placeholder="", required=True, **{'data-field': 'password'}) }}
                         <span class="toggleBtn hidden"></span>
-                        <label for="password" class="label">Password</label>
+                        {{ form.password.label(class="label") }}
                         <div class="feedback pt-2" aria-live="polite"></div>
                     </div>
                     <div class="input-group">
-                        <input type="password" class="input required-field" name="confirmation" id="confirmation"
-                            data-field="confirm_password" placeholder="" required>
+                        {{ form.confirmation(class="input required-field", placeholder="", required=True, **{'data-field':'confirm_password'}) }}
                         <span class="toggleBtn hidden"></span>
-                        <label for="confirmation" class="label">Confirm Password</label>
+                        {{ form.confirmation.label(class="label") }}
                         <div class="feedback pt-2" aria-live="polite"></div>
                     </div>
                     <div class="check">
                         <label class="d-flex position-relative text-white align-items-center ps-3">
-                            <input type="checkbox" name="terms" id="terms" class="text-white required-field"
-                                data-field="terms" value="accepted" required>
+                            {{ form.terms(class="text-white required-field", value="accepted", required=True, **{'data-field': 'terms'}) }}
                             <span>I agree with <a href="#">the terms and conditions</a></span>
                             <div class="feedback pt-2 d-block" aria-live="polite"></div>
                         </label>
                     </div>
-                    <!-- reCAPTCHA widget -->
-                    <div class="d-flex justify-content-center align-items-center">
-                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
-                    </div>
-                    <button id="submit-registration-form" class="btn w-100 text-uppercase shining-btn mt-3"
-                        type="submit">Submit</button>
-                    <div class="signin">
-                        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+                    <div class="d-flex flex-column align-items-center">
+                        {{ form.recaptcha }}
+                        {{ form.submit(id="submit-registration-form", class="btn w-50 text-uppercase shining-btn mt-3") }}
+                        <div class="signin">
+                            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -9,27 +9,27 @@
             <div
                 class="col-11 col-xs-10 col-s-9 col-sm-7 col-m-6 col-md-5 col-lg-3 login-form d-flex justify-content-center align-items-center auth-form">
                 <form id="login-form" action="/auth/login" method="post" autocomplete="off">
+                    {{ form.hidden_tag() }}
                     <h2 class="position-relative text-white text-center fs-3 fw-semibold my-5">Sign In</h2>
                     <div class="input-group">
-                        <input type="email" class="input required-field" name="email" id="email" data-field="email"
-                            placeholder="" autofocus required>
-                        <label for="email" class="label">Email</label>
+                        {{ form.email(class="input required-field", placeholder="", autofocus=True, required=True, **{'data-field': 'email'}) }}
+                        {{ form.email.label(class="label") }}
                         <div class="feedback pt-2" aria-live="polite"></div>
                     </div>
                     <div class="input-group">
-                        <input type="password" class="input required-field" name="password" id="password"
-                            data-field="password" placeholder="" required>
+                        {{ form.password(class="input required-field", placeholder="", required=True, **{'data-field': 'password'}) }}
                         <span class="toggleBtn hidden"></span>
-                        <label for="password" class="label">Password</label>
+                        {{ form.password.label(class="label") }}
                         <div class="feedback pt-2" aria-live="polite"></div>
                     </div>
-                    <button id="submit-login-form" class="btn w-100 mt-5 text-uppercase shining-btn"
-                        type="submit">Login</button>
-                    <div class="signin">
+                    <div class="d-flex flex-column align-items-center justify-content-center mt-5 mb-5">
+                        {{ form.submit(id="submit-login-form", class="btn w-50 text-uppercase shining-btn") }}
+                    </div>
+                    <div class="signin mb-1">
                         <p>Don&#39;t have an account? <a href="{{ url_for('auth.register') }}">Sign Up</a></p>
                     </div>
-                    <div class="forgot-password-link">
-                        <p>Forgot your password? <a href="{{ url_for('auth.forgot_password') }}">Reset it</a></p>
+                    <div class="forgot-password-link my-3">
+                        <p>Forgot your password? <a href="{{ url_for('account.forgot_password') }}">Reset it</a></p>
                     </div>
                 </form>
             </div>

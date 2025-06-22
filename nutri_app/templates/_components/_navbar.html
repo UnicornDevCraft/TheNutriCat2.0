@@ -19,13 +19,13 @@
         <span class="material-symbols-outlined" data-bs-toggle="modal" data-bs-target="#searchModal">search</span>
       </a>
       <!-- User Profile Button -->
-      <a href="{{ url_for('auth.profile') }}"
+      <a href="{{ url_for('account.profile') }}"
         class="btn btn-success rounded-circle text-white d-flex align-items-center justify-content-center"
         style="width: 40px; height: 40px;" aria-label="Profile">
-        {% if user %}
-        {{ user.username[:2].upper() }}
+        {% if current_user.is_authenticated %}
+          {{ current_user.username[:2].upper() }}
         {% else %}
-        <i class="bi bi-person-fill"></i>
+          <i class="bi bi-person-fill"></i>
         {% endif %}
       </a>
     </div>
@@ -41,7 +41,7 @@
         <a class="nav-link" href="{{ url_for('recipes.recipes') }}" data-bs-toggle="tooltip" data-bs-placement="bottom"
           data-bs-custom-class="custom-tooltip" data-bs-title="All Recipes">Recipes</a>
       </li>
-      {% if g.user %}
+      {% if current_user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('menus.menus') }}" data-bs-toggle="tooltip" data-bs-placement="bottom"
           data-bs-custom-class="custom-tooltip" data-bs-title="Custom Menus">Menus</a>
@@ -71,11 +71,11 @@
         <span class="material-symbols-outlined" data-bs-toggle="modal" data-bs-target="#searchModal">search</span>
       </a>
       <!-- User Profile Button -->
-      <a href="{{ url_for('auth.profile') }}"
+      <a href="{{ url_for('account.profile') }}"
         class="btn btn-success rounded-circle text-white d-flex align-items-center justify-content-center"
         style="width: 40px; height: 40px;" aria-label="Profile">
-        {% if user %}
-        {{ user.username[:2].upper() }}
+        {% if current_user.is_authenticated %}
+          {{ current_user.username[:2].upper() }}
         {% else %}
         <i class="bi bi-person-fill"></i>
         {% endif %}
@@ -100,7 +100,7 @@
         <a class="nav-link" href="{{ url_for('recipes.recipes') }}" data-bs-toggle="tooltip" data-bs-placement="bottom"
           data-bs-custom-class="custom-tooltip" data-bs-title="All Recipes">Recipes</a>
       </li>
-      {% if g.user %}
+      {% if current_user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('menus.menus') }}" data-bs-toggle="tooltip" data-bs-placement="bottom"
           data-bs-custom-class="custom-tooltip" data-bs-title="Custom Menus">Menus</a>

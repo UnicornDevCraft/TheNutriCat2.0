@@ -13,13 +13,13 @@ from flask import (
     Blueprint, flash, g, jsonify, redirect, render_template, request, session, url_for
 )
 from flask_sqlalchemy import pagination
+from flask_login import login_required
 from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 
-# Local application/library imports
-from nutri_app.auth import login_required
+
 from nutri_app import db
 from nutri_app.models import Favorite, Ingredient, Instruction, Recipe, RecipeIngredient, RecipeTag, Tag, User, UserRecipeNote
 

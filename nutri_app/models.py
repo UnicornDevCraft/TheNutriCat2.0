@@ -1,17 +1,23 @@
 """Database models for the application."""
+import random
+import string
 
-# Related third-party imports
 from sqlalchemy import Index, event
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import validates
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-# Local application/library imports
-from nutri_app import db
+from nutri_app import db, login_manager
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # User model for authentication and user management
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -19,6 +25,14 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
+    @classmethod
+    def generate_random_username(cls):
+        """Generate a unique random username"""
+        while True:
+            username = "user" + "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            if not cls.query.filter_by(username=username).first():
+                return username
 
     def set_password(self, user_password):
         self.password = generate_password_hash(user_password)

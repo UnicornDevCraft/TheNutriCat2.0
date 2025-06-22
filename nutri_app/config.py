@@ -18,9 +18,9 @@ class Config:
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  
 
 class DevelopmentConfig(Config):
-    DEBUG = True
-    RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
-    RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+    FLASK_DEBUG = True
+    RECAPTCHA_PUBLIC_KEY = os.getenv("TEST_RECAPTCHA_SITE_KEY")
+    RECAPTCHA_PRIVATE_KEY = os.getenv("TEST_RECAPTCHA_SECRET_KEY")
     MAIL_SERVER = "localhost"
     MAIL_PORT = 8025
     MAIL_USE_TLS = False
@@ -30,9 +30,9 @@ class DevelopmentConfig(Config):
     MAIL_DEFAULT_SENDER = "noreply@nutricat.local"
 
 class ProductionConfig(Config):
-    DEBUG = False
-    RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY")
-    RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+    FLASK_DEBUG = False
+    RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_SITE_KEY")
+    RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
     MAIL_SERVER = os.getenv("MAIL_SERVER")
     MAIL_PORT = os.getenv("MAIL_PORT")
     MAIL_USE_TLS = True
