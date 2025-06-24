@@ -3,3 +3,5 @@ __pycache__/
 logs/
 .env
 .pytest_cache/
+htmlcov/
+.coverage

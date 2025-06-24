@@ -10,12 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY")
-    
+    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL")
+    WTF_CSRF_ENABLED = True
+
     # 10MB limit for all uploads 
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 
 class DevelopmentConfig(Config):
     FLASK_DEBUG = True
@@ -28,6 +29,9 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = ""
     MAIL_PASSWORD = ""
     MAIL_DEFAULT_SENDER = "noreply@nutricat.local"
+
+class TestConfig(DevelopmentConfig):
+    SQLALCHEMY_DATABASE_URI = os.getenv("TEST_DATABASE_URL")
 
 class ProductionConfig(Config):
     FLASK_DEBUG = False

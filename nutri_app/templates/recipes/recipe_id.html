@@ -25,7 +25,7 @@
                     </a>
                 </div>
                 <div class="col-10 d-flex justify-content-end">
-                    {% if g.user %}
+                    {% if current_user.is_authenticated %}
                     <button class="btn rounded-circle favorite-btn" data-recipe-id="{{ recipe.id }}"
                         aria-label="Add or remove from favorites">
                         {% if recipe.id in favorite_recipe_ids_set %}
@@ -97,7 +97,7 @@
                         Instructions
                     </button>
                 </li>
-                {% if g.user %}
+                {% if current_user.is_authenticated %}
                 <li class="w-100 w-sm-auto nav-item">
                     <button class="nav-link tab-button m-0 mt-1" data-bs-toggle="pill" data-bs-target="#notesTab">
                         <img src="{{ url_for('static', filename='img/icons/sticky-notes.svg') }}" alt="Notes icon">
@@ -136,7 +136,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                {% if g.user %}
+                {% if current_user.is_authenticated %}
                 <div class="tab-pane fade d-flex flex-column justify-content-center align-items-center mt-3"
                     id="notesTab">
                     {% if note %}

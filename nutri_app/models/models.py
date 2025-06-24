@@ -9,12 +9,7 @@ from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-from nutri_app import db, login_manager
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+from nutri_app import db
 
 # User model for authentication and user management
 class User(db.Model, UserMixin):

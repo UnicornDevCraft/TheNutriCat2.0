@@ -3,6 +3,7 @@
 // This function fetches recipes from the server and updates the UI accordingly.
 function fetchRecipes(page = 1, filter = "", sort = "", search = "") {
     const apiUrl = document.getElementById("recipes-api-url").value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let queryUrl = `${apiUrl}?page=${page}`;
 
     if (search) queryUrl += `&search=${search}`;
@@ -10,7 +11,9 @@ function fetchRecipes(page = 1, filter = "", sort = "", search = "") {
     if (sort) queryUrl += `&sort=${sort}`;
 
     fetch(queryUrl, {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
+        headers: { "X-Requested-With": "XMLHttpRequest",
+            'X-CSRFToken': csrfToken
+         }
     })
         .then(response => {
             if (!response.ok) throw new Error("Failed to fetch recipes");
@@ -153,12 +156,14 @@ function searchRecipes(filter = "", sort = "") {
 
 // This function toggles the favorite status of a recipe and updates the UI
 async function toggleFavorite(recipeId) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     try {
         const response = await fetch(`/toggle_favorite/${recipeId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest"
+                "X-Requested-With": "XMLHttpRequest",
+                'X-CSRFToken': csrfToken
             },
         });
 
@@ -168,6 +173,7 @@ async function toggleFavorite(recipeId) {
         }
 
         const data = await response.json();
+        console.log(data)
 
         if (data.success) {
             showAlertMessage(data.message, "success");

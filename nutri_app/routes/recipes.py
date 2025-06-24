@@ -10,10 +10,10 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 from flask import (
-    Blueprint, flash, g, jsonify, redirect, render_template, request, session, url_for
+    Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
 )
 from flask_sqlalchemy import pagination
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import abort
@@ -55,11 +55,8 @@ def index():
         }
         for recipe in recipes
     ]
-
-    # Fetch the user from the session
-    user = User.query.filter_by(id=session.get('user_id')).first()
     
-    return render_template('recipes/index.html', favorites=favorite_recipes, user=user)
+    return render_template('recipes/index.html', favorites=favorite_recipes)
 
 
 @bp.route("/search")
@@ -90,16 +87,12 @@ def recipes():
     page = request.args.get('page', 1, type=int)
     per_page = 9
 
-    # Fetch the user from the session
-    user = User.query.filter_by(id=session.get('user_id')).first()
-
-    if user:
+    if current_user.is_authenticated:
         # Fetch the user's favorite recipes
-        favorite_recipes_ids = Favorite.query.filter_by(user_id=user.id).with_entities(Favorite.recipe_id).all()
+        favorite_recipes_ids = Favorite.query.filter_by(user_id=current_user.id).with_entities(Favorite.recipe_id).all()
         favorite_recipe_ids_set = {recipe_id for recipe_id, in favorite_recipes_ids}
     else:
         favorite_recipe_ids_set = set()
-        user = None
 
     # Get unique tag types and their names
     tag_types = db.session.query(Tag.type).distinct().all()
@@ -178,7 +171,7 @@ def recipes():
             "id": recipe.id
         } for recipe in paginated_recipes.items],
         "total_pages": paginated_recipes.pages,
-        "user": True if user else False}
+        "user": True if current_user else False}
         )
 
     return render_template(
@@ -189,7 +182,7 @@ def recipes():
         total_pages=paginated_recipes.pages,
         sort_order=sort_order,
         favorite_recipe_ids_set=favorite_recipe_ids_set, 
-        user=user
+        user=current_user
     )
 
 
@@ -231,17 +224,16 @@ def recipe_id(recipe_id):
     ]
 
     # Set up initial values
-    user = g.user
     has_my_recipe_tag = False
     note = None
     favorite_recipe_ids_set = set()
 
     # Favorite recipes set and notes
-    if user:
+    if current_user:
         favorite_recipe_ids_set = {
-            fav.recipe_id for fav in Favorite.query.filter_by(user_id=g.user.id).all()
+            fav.recipe_id for fav in Favorite.query.filter_by(user_id=current_user.id).all()
         }
-        note = UserRecipeNote.query.filter_by(user_id=g.user.id, recipe_id=recipe_id).first()
+        note = UserRecipeNote.query.filter_by(user_id=current_user.id, recipe_id=recipe_id).first()
 
         # Check if this recipe has a 'my_recipe' tag to determine if it's editable
         has_my_recipe_tag = any(tag.type == "my_recipe" for tag in recipe.tags)
@@ -253,7 +245,7 @@ def recipe_id(recipe_id):
         instructions=instructions,
         favorite_recipe_ids_set=favorite_recipe_ids_set, 
         note=note, 
-        user=user, 
+        user=current_user, 
         editable=has_my_recipe_tag
     )
 
@@ -263,12 +255,12 @@ def recipe_id(recipe_id):
 def save_note(recipe_id):
     """Save a note for a recipe."""
     note_text = request.form.get('note', '')
-    note = UserRecipeNote.query.filter_by(user_id=g.user.id, recipe_id=recipe_id).first()
+    note = UserRecipeNote.query.filter_by(user_id=current_user.id, recipe_id=recipe_id).first()
 
     if note:
         note.note = note_text
     else:
-        note = UserRecipeNote(user_id=g.user.id, recipe_id=recipe_id, note=note_text)
+        note = UserRecipeNote(user_id=current_user.id, recipe_id=recipe_id, note=note_text)
         db.session.add(note)
 
     db.session.commit()
@@ -280,7 +272,7 @@ def save_note(recipe_id):
 @login_required
 def edit_note(recipe_id):
     """Edit an existing note for a recipe."""
-    note = UserRecipeNote.query.filter_by(user_id=g.user.id, recipe_id=recipe_id).first()
+    note = UserRecipeNote.query.filter_by(user_id=current_user.id, recipe_id=recipe_id).first()
     if note:
         note.note = request.form["note"]
         db.session.commit()
@@ -292,7 +284,7 @@ def edit_note(recipe_id):
 @login_required
 def delete_note(recipe_id):
     """Delete a note for a recipe."""
-    note = UserRecipeNote.query.filter_by(user_id=g.user.id, recipe_id=recipe_id).first()
+    note = UserRecipeNote.query.filter_by(user_id=current_user.id, recipe_id=recipe_id).first()
     if note:
         db.session.delete(note)
         db.session.commit()
@@ -304,20 +296,19 @@ def delete_note(recipe_id):
 @login_required
 def toggle_favorite(recipe_id):
     """Toggle favorite status for a recipe."""
-    user = g.user
     recipe = Recipe.query.get(recipe_id)
 
     if not recipe:
         return jsonify({"success": False, "error": "Recipe not found"}), 404
 
-    favorite = Favorite.query.filter_by(user_id=user.id, recipe_id=recipe_id).first()
+    favorite = Favorite.query.filter_by(user_id=current_user.id, recipe_id=recipe_id).first()
 
     if favorite:
         db.session.delete(favorite)
         db.session.commit()
         return jsonify({"success": True, "favorite": False, "message": "Removed from favorites!"})
     else:
-        new_favorite = Favorite(user_id=user.id, recipe_id=recipe_id)
+        new_favorite = Favorite(user_id=current_user.id, recipe_id=recipe_id)
         db.session.add(new_favorite)
         db.session.commit()
         return jsonify({"success": True, "favorite": True, "message": "Added to favorites!"})
@@ -450,7 +441,7 @@ def create():
 
         # Add notes
         if notes:
-            user_id = g.user.id
+            user_id = current_user.id
             db.session.add(UserRecipeNote(
                 user_id=user_id,
                 recipe_id=recipe.id,
@@ -613,7 +604,7 @@ def edit(recipe_id):
 
         # Update notes
         if notes:
-            user_id = g.user.id
+            user_id = current_user.id
             user_note = UserRecipeNote.query.filter_by(user_id=user_id, recipe_id=recipe.id).first()
             if user_note:
                 user_note.note = notes.strip()
@@ -690,9 +681,9 @@ def edit(recipe_id):
 
     tags = Tag.query.order_by(Tag.name).all()
 
-    notes = UserRecipeNote.query.filter_by(user_id=g.user.id, recipe_id=recipe.id).first()
+    notes = UserRecipeNote.query.filter_by(user_id=current_user.id, recipe_id=recipe.id).first()
 
-    return render_template("recipes/edit.html", recipe=recipe, ingredients=ingredients, instructions=instructions, tags=tags, notes=notes, user=g.user)
+    return render_template("recipes/edit.html", recipe=recipe, ingredients=ingredients, instructions=instructions, tags=tags, notes=notes, user=current_user)
 
 
 @bp.route("/recipe/<int:recipe_id>/delete", methods=["POST"])
