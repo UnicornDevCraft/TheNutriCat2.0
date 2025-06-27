@@ -10,7 +10,6 @@ from nutri_app.models import User
 from nutri_app.forms import RegistrationForm, LoginForm
 
 
-
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 logger = logging.getLogger(__name__)
 
@@ -22,10 +21,7 @@ def register():
 
     if request.method == "POST":
         if form.validate_on_submit():
-            user = User(
-                username=User.generate_random_username(), 
-                email=form.email.data
-                )
+            user = User(username=User.generate_random_username(), email=form.email.data)
             user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
@@ -36,8 +32,8 @@ def register():
         if form.errors != {}:
             for err_list in form.errors.values():
                 for err_msg in err_list:
-                    flash(f'An error occured: {err_msg}', category='error')
-        
+                    flash(f"An error occured: {err_msg}", category="error")
+
     return render_template("auth/register.html", form=form)
 
 

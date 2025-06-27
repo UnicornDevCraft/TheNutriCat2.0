@@ -1,13 +1,14 @@
 """Token configuration for password reset"""
+
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
-
 
 
 def generate_reset_token(user_email):
     """Generate a password reset token"""
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     return s.dumps(user_email, salt="password-reset-salt")
+
 
 def verify_reset_token(token, max_age=3600):
     """Verify the password reset token"""

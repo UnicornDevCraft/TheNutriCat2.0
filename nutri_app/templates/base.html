@@ -25,7 +25,7 @@
 <body>
   <!-- Routes to pass into javascript -->
   <input type="hidden" id="recipes-api-url" value="{{ url_for('recipes.recipes') }}">
-  <input type="hidden" id="recipe-id-url" value="{{ url_for('recipes.recipe_id', recipe_id=0)[:-1] }}">
+  <input type="hidden" id="recipe-id-url" value="{{ url_for('recipe_id.recipe_id', recipe_id=0)[:-1] }}">
   <input type="hidden" id="menus-api-url" value="{{ url_for('menus.menus') }}">
 
   <!-- Notification containers -->
