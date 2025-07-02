@@ -36,7 +36,26 @@ def session(db):
 def test_client(app, session):
     return app.test_client()
 
+@pytest.fixture
+def secret_key():
+    return "test-secret-key"
+
+@pytest.fixture
+def test_email():
+    return "user@example.com"
+
+@pytest.fixture
+def app_with_secret(app, secret_key):
+    app.config["SECRET_KEY"] = secret_key
+    return app
+
 @pytest.fixture(scope='module')
 def new_user():
     user = User(username="testuser", email="test@example.com", password="")
     return user
+
+@pytest.fixture(autouse=True)
+def bind_factories(session):
+    from tests.factories import RecipeFactory, TagFactory
+    RecipeFactory._meta.sqlalchemy_session = session
+    TagFactory._meta.sqlalchemy_session = session

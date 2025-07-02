@@ -3,3 +3,10 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+nutrivenv/
+.ruff_cahce
+.pytest_cache
+htmlcov/
+logs/
+.coverage
+.gitignore
