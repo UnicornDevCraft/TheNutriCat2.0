@@ -29,7 +29,13 @@ MAX_FILE_SIZE = 4 * 1024 * 1024
 
 
 def get_tag_options(tag_types: list[tuple]) -> dict[str, list[str]]:
-    """Get unique tag types and their names"""
+    """
+    Get unique tag types and their names
+    Args:
+        tag_types (list[tuple]): List of tuples containing tag types.
+    Returns:
+        dict[str, list[str]]: Dictionary with tag type names as keys and lists of tag names as values.
+    """
     tag_types = [t[0] for t in tag_types]
     tag_options = {}
     for t in tag_types:
@@ -65,7 +71,13 @@ def get_tag_options(tag_types: list[tuple]) -> dict[str, list[str]]:
 
 
 def get_recipe_ingredients(recipe_id: int) -> list[str]:
-    """Get ingredients for a recipe by its ID."""
+    """
+    Get ingredients for a recipe by its ID.
+    Args:
+        recipe_id (int): The ID of the recipe.
+    Returns:
+        list[str]: List of dictionaries containing ingredient details.
+    """
     if not recipe_id:
         logger.error("Recipe ID is required to fetch ingredients.")
         return []
@@ -92,9 +104,18 @@ def get_recipe_ingredients(recipe_id: int) -> list[str]:
 
 
 def update_ingredients(
-    ingredient_names, quantities, units, quantity_notes, ingredient_notes, recipe
+    ingredient_names: list, quantities: list, units: list, quantity_notes: list, ingredient_notes: list, recipe: object
 ) -> None:
-    """Update the ingredients in the database."""
+    """
+    Update the ingredients in the database.
+    Args:
+        ingredient_names (list): List of ingredient names.
+        quantities (list): List of quantities for each ingredient.
+        units (list): List of units for each ingredient.
+        quantity_notes (list): List of notes for each quantity.
+        ingredient_notes (list): List of notes for each ingredient.
+        recipe (object): The recipe object to which the ingredients belong.
+    """
     for i in range(len(ingredient_names)):
         name = ingredient_names[i].strip()
         if not name:
@@ -121,8 +142,14 @@ def update_ingredients(
     logger.info("Ingredients updated successfully.")
 
 
-def update_instructions(instructions: list[str], steps: list[str], recipe) -> None:
-    """Update the instructions in the database."""
+def update_instructions(instructions: list[str], steps: list[str], recipe: object) -> None:
+    """
+    Update the instructions in the database.
+    Args:
+        instructions (list[str]): List of instruction strings.
+        steps (list[str]): List of step numbers corresponding to each instruction.
+        recipe (object): The recipe object to which the instructions belong.
+    """
     for i in range(len(instructions)):
         line = instructions[i].strip()
         if not line:
@@ -137,8 +164,13 @@ def update_instructions(instructions: list[str], steps: list[str], recipe) -> No
     logger.info("Instructions updated successfully.")
 
 
-def update_tags(tag_list: list[str], recipe) -> None:
-    """Update the tags for a recipe."""
+def update_tags(tag_list: list[str], recipe: object) -> None:
+    """
+    Update the tags for a recipe.
+    Args:
+        tag_list (list[str]): List of tag names.
+        recipe (object): The recipe object to which the tags belong.
+    """
     for i in range(len(tag_list)):
         name = tag_list[i].strip()
         if not name:
@@ -153,7 +185,12 @@ def update_tags(tag_list: list[str], recipe) -> None:
 
 
 def update_notes(recipe, notes: str, user_id: int) -> None:
-    """Update the notes for a recipe."""
+    """Update the notes for a recipe.
+    Args:
+        recipe (object): The recipe object to which the notes belong.
+        notes (str): The notes to be added or updated.
+        user_id (int): The ID of the user adding the notes.
+    """
     if notes:
         user_note = UserRecipeNote.query.filter_by(
             user_id=user_id, recipe_id=recipe.id
@@ -167,8 +204,13 @@ def update_notes(recipe, notes: str, user_id: int) -> None:
     logger.info("Notes updated successfully.")
 
 
-def upload_image(image, recipe) -> None:
-    """Upload an image to S3 and update the recipe with the image URL."""
+def upload_image(image: object, recipe: object) -> None:
+    """
+    Upload an image to S3 and update the recipe with the image URL.
+    Args:
+        image (object): The image file to be uploaded.
+        recipe (object): The recipe object to which the image belongs.
+    """
     if image and image.filename:
         image.seek(0, 2)  # Move cursor to end of file
         file_size = image.tell()  # Get current position (== file size in bytes)
@@ -214,7 +256,11 @@ def upload_image(image, recipe) -> None:
 
 
 def delete_s3_image(s3_url: str) -> None:
-    """Delete an image from S3 given its public URL."""
+    """
+    Delete an image from S3 given its public URL.
+    Args:
+        s3_url (str): The public URL of the image to be deleted.
+    """
     s3 = boto3.client("s3")
 
     try:

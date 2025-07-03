@@ -1,7 +1,7 @@
 """Utility functions for handling menus and their organization in the application."""
 
 
-def organize_recipes_by_day(recipes, days_of_week, meal_types):
+def organize_recipes_by_day(recipes: list, days_of_week: list, meal_types: list) -> dict:
     """
     Organize recipes by day of the week and meal type.
     Args:
@@ -29,7 +29,7 @@ def organize_recipes_by_day(recipes, days_of_week, meal_types):
     return result
 
 
-def to_structured_list(lines):
+def to_structured_list(lines: list) -> list:
     """
     Convert a list of lines into a structured list of categories and items.
     Args:
@@ -64,7 +64,7 @@ def to_structured_list(lines):
     return structured_list
 
 
-def build_shopping_info(menu_shopping_info):
+def build_shopping_info(menu_shopping_info: object) -> dict:
     """
     Build structured shopping information from the menu shopping info object.
     Args:
