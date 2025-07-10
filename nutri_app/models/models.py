@@ -1,17 +1,20 @@
 """Database models for the application."""
 
-# Related third-party imports
+import random
+import string
+
 from sqlalchemy import Index, event
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import validates
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-# Local application/library imports
 from nutri_app import db
 
+
 # User model for authentication and user management
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -19,6 +22,16 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
+    @classmethod
+    def generate_random_username(cls):
+        """Generate a unique random username"""
+        while True:
+            username = "user" + "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            if not cls.query.filter_by(username=username).first():
+                return username
 
     def set_password(self, user_password):
         self.password = generate_password_hash(user_password)
@@ -40,18 +53,32 @@ class Recipe(db.Model):
     quality_img_URL = db.Column(db.String(255), nullable=True)
     compressed_img_URL = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    tags = db.relationship("Tag", secondary="recipe_tags", back_populates="recipes", cascade="all, delete")
-    ingredients = db.relationship("Ingredient", secondary="recipe_ingredients", backref="recipes")
-    instructions = db.relationship("Instruction", backref="recipes", lazy=True, cascade="all, delete-orphan")
-    user_notes = db.relationship("UserRecipeNote", back_populates="recipe", lazy=True, cascade="all, delete-orphan")
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    tags = db.relationship(
+        "Tag", secondary="recipe_tags", back_populates="recipes", cascade="all, delete"
+    )
+    ingredients = db.relationship(
+        "Ingredient", secondary="recipe_ingredients", backref="recipes"
+    )
+    instructions = db.relationship(
+        "Instruction", backref="recipes", lazy=True, cascade="all, delete-orphan"
+    )
+    user_notes = db.relationship(
+        "UserRecipeNote",
+        back_populates="recipe",
+        lazy=True,
+        cascade="all, delete-orphan",
+    )
     title_search = db.Column(TSVECTOR)
 
     @validates("title")
     def validate_title(self, key, value):
         self.title_search = func.to_tsvector("english", value)
         return value
+
 
 @event.listens_for(Recipe, "before_insert")
 @event.listens_for(Recipe, "before_update")
@@ -65,13 +92,17 @@ class RecipeTranslation(db.Model):
     __tablename__ = "recipe_translations"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
     language_code = db.Column(db.String(10), nullable=False)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
     instructions = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 # Ingredient model for storing ingredient information
@@ -81,7 +112,9 @@ class Ingredient(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     name_search = db.Column(TSVECTOR)
 
     __table_args__ = (
@@ -99,14 +132,20 @@ class RecipeIngredient(db.Model):
     __tablename__ = "recipe_ingredients"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False)
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
+    ingredient_id = db.Column(
+        db.Integer, db.ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False
+    )
     quantity = db.Column(db.String(50), nullable=True)
     unit = db.Column(db.String(50), nullable=True)
     quantity_notes = db.Column(db.String(50), nullable=True)
-    ingredient_notes = db.Column(db.String(255), nullable=True) 
+    ingredient_notes = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 # IngredientTranslation model for storing translations of ingredients
@@ -114,23 +153,31 @@ class IngredientTranslation(db.Model):
     __tablename__ = "ingredient_translations"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ingredient_id = db.Column(db.Integer, db.ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False)
+    ingredient_id = db.Column(
+        db.Integer, db.ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False
+    )
     language_code = db.Column(db.String(10), nullable=False)
     translated_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 # Instruction model for storing cooking instructions
 class Instruction(db.Model):
     __tablename__ = "instructions"
-    
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
     step_number = db.Column(db.Integer, nullable=False)
     instruction = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
     instruction_search = db.Column(TSVECTOR)
 
     @validates("instruction")
@@ -146,12 +193,14 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False)
     type = db.Column(db.String(50), nullable=False)
-     # Recipe relationship using the association table "recipe_tags"
-    recipes = db.relationship("Recipe", secondary="recipe_tags", back_populates="tags", passive_deletes=True)
+    # Recipe relationship using the association table "recipe_tags"
+    recipes = db.relationship(
+        "Recipe", secondary="recipe_tags", back_populates="tags", passive_deletes=True
+    )
 
     __table_args__ = (
         db.UniqueConstraint("name", "type", name="uix_tag_name_type"),
-        Index("ix_tags_name", "name"), 
+        Index("ix_tags_name", "name"),
     )
 
 
@@ -159,8 +208,18 @@ class Tag(db.Model):
 class RecipeTag(db.Model):
     __tablename__ = "recipe_tags"
 
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), primary_key=True, nullable=False)
-    tag_id = db.Column(db.Integer, db.ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+    recipe_id = db.Column(
+        db.Integer,
+        db.ForeignKey("recipes.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    tag_id = db.Column(
+        db.Integer,
+        db.ForeignKey("tags.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
 
 
 # Favorite model for storing user favorites
@@ -168,12 +227,18 @@ class Favorite(db.Model):
     __tablename__ = "favorites"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
     added_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
     # Ensures a user cannot favorite the same recipe multiple times
-    __table_args__ = (db.UniqueConstraint("user_id", "recipe_id", name="uq_user_recipe"),)
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "recipe_id", name="uq_user_recipe"),
+    )
 
 
 # UserRecipeNote model for storing user notes on recipes
@@ -181,18 +246,25 @@ class UserRecipeNote(db.Model):
     __tablename__ = "user_recipe_notes"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    recipe_id = db.Column(
+        db.Integer, db.ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False
+    )
     note = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     # Ensures a user cannot leave multiple notes for the same recipe
     user = db.relationship("User", backref="recipe_notes")
     recipe = db.relationship("Recipe", back_populates="user_notes")
-    
 
-    __table_args__ = (db.UniqueConstraint("user_id", "recipe_id", name="uix_user_recipe"),)
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "recipe_id", name="uix_user_recipe"),
+    )
 
 
 # MenuShoppingInfo model for storing shopping information related to menus
@@ -200,7 +272,12 @@ class MenuShoppingInfo(db.Model):
     __tablename__ = "menu_shopping_infos"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    menu_tag_id = db.Column(db.Integer, db.ForeignKey("tags.id", ondelete="CASCADE"), unique=True, nullable=False)
+    menu_tag_id = db.Column(
+        db.Integer,
+        db.ForeignKey("tags.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
     shopping_list_text = db.Column(db.Text, nullable=True)
     preparations_text = db.Column(db.Text, nullable=True)
     meat_marinades_text = db.Column(db.Text, nullable=True)
@@ -213,4 +290,8 @@ class MenuShoppingInfo(db.Model):
 # Adding indexing for search
 Index("ix_recipes_title_search", Recipe.title_search, postgresql_using="gin")
 Index("ix_ingredients_name_search", Ingredient.name_search, postgresql_using="gin")
-Index("ix_instructions_instruction_search", Instruction.instruction_search, postgresql_using="gin")
+Index(
+    "ix_instructions_instruction_search",
+    Instruction.instruction_search,
+    postgresql_using="gin",
+)

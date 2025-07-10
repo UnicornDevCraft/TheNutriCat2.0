@@ -48,7 +48,7 @@ if (window.location.pathname.startsWith("/auth/register")) {
     setupFormSubmitWithSpinner(form, submitButton, "Login");
     autoDismissToasts();
   });
-} else if (window.location.pathname.startsWith("/auth/forgot-password")) {
+} else if (window.location.pathname.startsWith("/account/forgot-password")) {
   document.addEventListener("DOMContentLoaded", () => {
     letItSnow();
     btnShine();
@@ -73,21 +73,21 @@ if (window.location.pathname.startsWith("/auth/register")) {
       const email = emailInput.value.trim();
 
       // Check if email exists in the database
-      const res = await fetch(`/auth/check-email?email=${encodeURIComponent(email)}`);
+      const res = await fetch(`/account/check-email?email=${encodeURIComponent(email)}`);
       const data = await res.json();
 
       if (!data.exists) {
         showAlertMessage("This email is not registered", "danger");
       } else {
         // Proceed to submit the form if the email is valid
-        form.submit();
+        HTMLFormElement.prototype.submit.call(form);
         setupFormSubmitWithSpinner(form, submitButton, "Submitted");
       }
     });
 
     autoDismissToasts();
   });
-} else if (window.location.pathname.startsWith("/auth/reset-password")) {
+} else if (window.location.pathname.startsWith("/account/reset-password")) {
   document.addEventListener("DOMContentLoaded", () => {
     letItSnow();
     btnShine();
@@ -109,7 +109,7 @@ if (window.location.pathname.startsWith("/auth/register")) {
     setupFormSubmitWithSpinner(form, submitButton, "Submitted");
     autoDismissToasts();
   });
-} else if (window.location.pathname.startsWith("/auth/profile")) {
+} else if (window.location.pathname.startsWith("/account/profile")) {
   // Setting up the profile page change password modal
   const modal = document.getElementById("changePasswordModal");
 

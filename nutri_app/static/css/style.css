@@ -16156,6 +16156,7 @@ body {
 }
 .home .welcome-container p {
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  margin: 0.5rem;
 }
 .home .welcome-container button {
   color: #fff;

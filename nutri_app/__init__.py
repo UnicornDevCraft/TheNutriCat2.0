@@ -1,6 +1,7 @@
 """
 Application initialization functions and logging configuration.
 """
+
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -10,6 +11,8 @@ from flask import Flask
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_wtf import CSRFProtect
 from werkzeug.exceptions import HTTPException
 
 # Load environment variables from .env file
@@ -18,6 +21,9 @@ load_dotenv()
 db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
+login_manager = LoginManager()
+csrf = CSRFProtect()
+
 
 def configure_logging(app):
     """
@@ -28,14 +34,14 @@ def configure_logging(app):
     # Set up logging to a file
     log_dir = "logs"
     os.makedirs(log_dir, exist_ok=True)
-    
+
     file_handler = RotatingFileHandler(
         f"{log_dir}/app.log", maxBytes=1_000_000, backupCount=5
     )
     file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(logging.Formatter(
-        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
-    ))
+    file_handler.setFormatter(
+        logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
+    )
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
@@ -53,7 +59,7 @@ def configure_logging(app):
     def handle_exception(e):
         if isinstance(e, HTTPException):
             return e
-        
+
         app.logger.exception("Unhandled Exception: %s", e)
         return "An internal error occurred.", 500
 
@@ -64,13 +70,17 @@ def register_blueprints(app):
     Args:
         app (Flask): The Flask application instance.
     """
-    from nutri_app.auth import bp as auth_bp
-    from nutri_app.recipes import bp as recipes_bp
-    from nutri_app.menus import bp as menus_bp
+    from nutri_app.routes.auth import bp as auth_bp
+    from nutri_app.routes.recipes import bp as recipes_bp
+    from nutri_app.routes.menus import bp as menus_bp
+    from nutri_app.routes.account import bp as profile_bp
+    from nutri_app.routes.id_recipe import bp as id_recipe_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(recipes_bp)
     app.register_blueprint(menus_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(id_recipe_bp)
 
 
 def create_app():
@@ -87,9 +97,17 @@ def create_app():
     app.logger.info(f"Starting app in {config_name} mode.")
 
     db.init_app(app)
+    login_manager.init_app(app)
+    csrf.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
+    from nutri_app.models import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
     configure_logging(app)
     register_blueprints(app)
-    
+
     return app
